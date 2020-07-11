@@ -79,8 +79,8 @@ def get_xp_val(xp):
     return xp_arr
 
 
-############################################### main
-root_dir = '/b/home/uha/hfawaz-datas/temp-dl-tsc/'
+# main
+root_dir = '/content/ucr/My Drive/Datasets/Time Series Classification'
 xps = ['use_bottleneck', 'use_residual', 'nb_filters', 'depth',
        'kernel_size', 'batch_size']
 
@@ -99,7 +99,8 @@ if sys.argv[1] == 'InceptionTime':
         if iter != 0:
             trr = '_itr_' + str(iter)
 
-        tmp_output_directory = root_dir + '/results/' + classifier_name + '/' + archive_name + trr + '/'
+        tmp_output_directory = root_dir + '/results/' + \
+            classifier_name + '/' + archive_name + trr + '/'
 
         for dataset_name in utils.constants.dataset_names_for_archive[archive_name]:
             print('\t\t\tdataset_name: ', dataset_name)
@@ -126,7 +127,8 @@ if sys.argv[1] == 'InceptionTime':
 
     datasets_dict = read_all_datasets(root_dir, archive_name)
 
-    tmp_output_directory = root_dir + '/results/' + classifier_name + '/' + archive_name + '/'
+    tmp_output_directory = root_dir + '/results/' + \
+        classifier_name + '/' + archive_name + '/'
 
     for dataset_name in utils.constants.dataset_names_for_archive[archive_name]:
         print('\t\t\tdataset_name: ', dataset_name)
@@ -203,7 +205,8 @@ elif sys.argv[1] == 'InceptionTime_xp':
 
     datasets_dict = read_all_datasets(root_dir, archive_name)
 
-    tmp_output_directory = root_dir + '/results/' + classifier_name + '/' + archive_name + '/'
+    tmp_output_directory = root_dir + '/results/' + \
+        classifier_name + '/' + archive_name + '/'
 
     for xp in xps:
         xp_arr = get_xp_val(xp)

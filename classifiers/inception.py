@@ -1,5 +1,6 @@
 # resnet model
-import keras
+import tensorflow as tf
+from tensorflow import keras
 import numpy as np
 import time
 
@@ -50,7 +51,8 @@ class Classifier_INCEPTION:
                                                  strides=stride, padding='same', activation=activation, use_bias=False)(
                 input_inception))
 
-        max_pool_1 = keras.layers.MaxPool1D(pool_size=3, strides=stride, padding='same')(input_tensor)
+        max_pool_1 = keras.layers.MaxPool1D(
+            pool_size=3, strides=stride, padding='same')(input_tensor)
 
         conv_6 = keras.layers.Conv1D(filters=self.nb_filters, kernel_size=1,
                                      padding='same', activation=activation, use_bias=False)(max_pool_1)
@@ -65,7 +67,7 @@ class Classifier_INCEPTION:
     def _shortcut_layer(self, input_tensor, out_tensor):
         shortcut_y = keras.layers.Conv1D(filters=int(out_tensor.shape[-1]), kernel_size=1,
                                          padding='same', use_bias=False)(input_tensor)
-        shortcut_y = keras.layers.normalization.BatchNormalization()(shortcut_y)
+        shortcut_y = keras.layers.BatchNormalization()(shortcut_y)
 
         x = keras.layers.Add()([shortcut_y, out_tensor])
         x = keras.layers.Activation('relu')(x)
@@ -87,7 +89,8 @@ class Classifier_INCEPTION:
 
         gap_layer = keras.layers.GlobalAveragePooling1D()(x)
 
-        output_layer = keras.layers.Dense(nb_classes, activation='softmax')(gap_layer)
+        output_layer = keras.layers.Dense(
+            nb_classes, activation='softmax')(gap_layer)
 
         model = keras.models.Model(inputs=input_layer, outputs=output_layer)
 
@@ -107,7 +110,7 @@ class Classifier_INCEPTION:
         return model
 
     def fit(self, x_train, y_train, x_val, y_val, y_true, plot_test_acc=False):
-        if len(keras.backend.tensorflow_backend._get_available_gpus()) == 0:
+        if len(tf.config.experimental.list_physical_devices('GPU')) == 0:
             print('error no gpu')
             exit()
         # x_val and y_val are only used to monitor the test loss and NOT for training
@@ -159,5 +162,6 @@ class Classifier_INCEPTION:
             return df_metrics
         else:
             test_duration = time.time() - start_time
-            save_test_duration(self.output_directory + 'test_duration.csv', test_duration)
+            save_test_duration(self.output_directory +
+                               'test_duration.csv', test_duration)
             return y_pred

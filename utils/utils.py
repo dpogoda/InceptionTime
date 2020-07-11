@@ -1,3 +1,13 @@
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import recall_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import accuracy_score
+from utils.constants import UNIVARIATE_ARCHIVE_NAMES as ARCHIVE_NAMES
+from utils.constants import UNIVARIATE_DATASET_NAMES as DATASET_NAMES
+import utils
+import operator
+import os
+import matplotlib.pyplot as plt
 from builtins import print
 import numpy as np
 import pandas as pd
@@ -5,36 +15,23 @@ import matplotlib
 import random
 
 matplotlib.use('agg')
-import matplotlib.pyplot as plt
 
 matplotlib.rcParams['font.family'] = 'sans-serif'
 matplotlib.rcParams['font.sans-serif'] = 'Arial'
-
-import os
-import operator
-import utils
-
-from utils.constants import UNIVARIATE_DATASET_NAMES as DATASET_NAMES
-from utils.constants import UNIVARIATE_ARCHIVE_NAMES  as ARCHIVE_NAMES
-
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import precision_score
-from sklearn.metrics import recall_score
-from sklearn.preprocessing import LabelEncoder
 
 
 def check_if_file_exits(file_name):
     return os.path.exists(file_name)
 
 
-def readucr(filename, delimiter=','):
+def readucr(filename, delimiter='\t'):
     data = np.loadtxt(filename, delimiter=delimiter)
     Y = data[:, 0]
     X = data[:, 1:]
     return X, Y
 
 
-def readsits(filename, delimiter=','):
+def readsits(filename, delimiter='\t'):
     data = np.loadtxt(filename, delimiter=delimiter)
     Y = data[:, -1]
     X = data[:, :-1]
@@ -56,9 +53,10 @@ def create_directory(directory_path):
 def read_dataset(root_dir, archive_name, dataset_name):
     datasets_dict = {}
 
-    file_name = root_dir + '/archives/' + archive_name + '/' + dataset_name + '/' + dataset_name
-    x_train, y_train = readucr(file_name + '_TRAIN')
-    x_test, y_test = readucr(file_name + '_TEST')
+    file_name = root_dir + '/archives/' + archive_name + \
+        '/' + dataset_name + '/' + dataset_name
+    x_train, y_train = readucr(file_name + '_TRAIN.tsv')
+    x_test, y_test = readucr(file_name + '_TEST.tsv')
     datasets_dict[dataset_name] = (x_train.copy(), y_train.copy(), x_test.copy(),
                                    y_test.copy())
 
@@ -72,10 +70,11 @@ def read_all_datasets(root_dir, archive_name):
 
     if archive_name == 'TSC':
         for dataset_name in DATASET_NAMES:
-            root_dir_dataset = root_dir + '/archives/' + archive_name + '/' + dataset_name + '/'
+            root_dir_dataset = root_dir + '/archives/' + \
+                archive_name + '/' + dataset_name + '/'
             file_name = root_dir_dataset + dataset_name
-            x_train, y_train = readucr(file_name + '_TRAIN')
-            x_test, y_test = readucr(file_name + '_TEST')
+            x_train, y_train = readucr(file_name + '_TRAIN.tsv')
+            x_test, y_test = readucr(file_name + '_TEST.tsv')
 
             datasets_dict[dataset_name] = (x_train.copy(), y_train.copy(), x_test.copy(),
                                            y_test.copy())
@@ -90,7 +89,8 @@ def read_all_datasets(root_dir, archive_name):
     elif archive_name == 'InlineSkateXPs':
 
         for dataset_name in utils.constants.dataset_names_for_archive[archive_name]:
-            root_dir_dataset = root_dir + '/archives/' + archive_name + '/' + dataset_name + '/'
+            root_dir_dataset = root_dir + '/archives/' + \
+                archive_name + '/' + dataset_name + '/'
 
             x_train = np.load(root_dir_dataset + 'x_train.npy')
             y_train = np.load(root_dir_dataset + 'y_train.npy')
@@ -157,7 +157,7 @@ def generate_results_csv(output_file_name, root_dir, clfs):
             curr_archive_name = archive_name
             for dataset_name in datasets_dict.keys():
                 output_dir = root_dir + '/results/' + classifier_name + '/' \
-                             + curr_archive_name + '/' + dataset_name + '/' + 'df_metrics.csv'
+                    + curr_archive_name + '/' + dataset_name + '/' + 'df_metrics.csv'
                 print(output_dir)
                 if not os.path.exists(output_dir):
                     continue
@@ -263,7 +263,8 @@ def create_synthetic_dataset(pattern_len=[0.25], pattern_pos=[0.1, 0.65], ts_len
         curr_pattern_pos = class_def[c]['pattern_pos']
         curr_pattern_len = class_def[c]['pattern_len']
         x_train[i][curr_pattern_pos:curr_pattern_pos + curr_pattern_len] = \
-            x_train[i][curr_pattern_pos:curr_pattern_pos + curr_pattern_len] + 1.0
+            x_train[i][curr_pattern_pos:curr_pattern_pos +
+                       curr_pattern_len] + 1.0
 
         # for the test
         c = y_test[i]
@@ -274,10 +275,10 @@ def create_synthetic_dataset(pattern_len=[0.25], pattern_pos=[0.1, 0.65], ts_len
 
     # znorm
     x_train = (x_train - x_train.mean(axis=1, keepdims=True)) \
-              / x_train.std(axis=1, keepdims=True)
+        / x_train.std(axis=1, keepdims=True)
 
     x_test = (x_test - x_test.mean(axis=1, keepdims=True)) \
-             / x_test.std(axis=1, keepdims=True)
+        / x_test.std(axis=1, keepdims=True)
 
     # visualize example
     # plt.figure()
@@ -365,7 +366,8 @@ def run_length_xps(root_dir):
         new_x_train = resample_dataset(x_train, l)
         new_x_test = resample_dataset(x_test, l)
         new_dataset_name = dataset_name + '-' + str(l)
-        new_dataset_dir = root_dir + 'archives/' + new_archive_name + '/' + new_dataset_name + '/'
+        new_dataset_dir = root_dir + 'archives/' + \
+            new_archive_name + '/' + new_dataset_name + '/'
         create_directory(new_dataset_dir)
 
         np.save(new_dataset_dir + 'x_train.npy', new_x_train)
